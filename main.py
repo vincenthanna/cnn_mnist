@@ -50,17 +50,17 @@ def load_mnist_set(labelfilename, imagefilename):
     col = 0
     '''
     label 파일 포맷은 아래와 같다.
-    
-    [offset] [type]          [value]          [description] 
-    0000     32 bit integer  0x00000801(2049) magic number (MSB first) 
-    0004     32 bit integer  60000            number of items 
-    0008     unsigned byte   ??               label 
-    0009     unsigned byte   ??               label 
-    ........ 
+
+    [offset] [type]          [value]          [description]
+    0000     32 bit integer  0x00000801(2049) magic number (MSB first)
+    0004     32 bit integer  60000            number of items
+    0008     unsigned byte   ??               label
+    0009     unsigned byte   ??               label
+    ........
     xxxx     unsigned byte   ??               label
-    
+
     The labels values are 0 to 9.
-    
+
     처음에서 8바이트 이후 byte단위로 label(0~9) 값이 존재함.
     '''
     with open(labelfilename, "rb") as f:
@@ -80,17 +80,17 @@ def load_mnist_set(labelfilename, imagefilename):
 
     '''
     이미지 파일 포맷은 다음과 같다 :
-     
-    [offset] [type]          [value]          [description] 
-    0000     32 bit integer  0x00000803(2051) magic number 
-    0004     32 bit integer  60000            number of images 
-    0008     32 bit integer  28               number of rows 
-    0012     32 bit integer  28               number of columns 
-    0016     unsigned byte   ??               pixel 
-    0017     unsigned byte   ??               pixel 
-    ........ 
+
+    [offset] [type]          [value]          [description]
+    0000     32 bit integer  0x00000803(2051) magic number
+    0004     32 bit integer  60000            number of images
+    0008     32 bit integer  28               number of rows
+    0012     32 bit integer  28               number of columns
+    0016     unsigned byte   ??               pixel
+    0017     unsigned byte   ??               pixel
+    ........
     xxxx     unsigned byte   ??               pixel
-    
+
     16바이트 이후에 이미지 데이터가 시작됨.
     이미지 크기는 row*col 로 계산하면 되는데 (28,28)크기임.
     '''
@@ -112,8 +112,8 @@ def load_mnist_set(labelfilename, imagefilename):
         print("images len : ", len(images))
 
     '''return labels, images as numpy array
-    
-    label 데이터는 (?, 10) 포맷, 이미지는(?, 784) 포맷임. 
+
+    label 데이터는 (?, 10) 포맷, 이미지는(?, 784) 포맷임.
     '''
     #return np.array(labels).astype(np.float32), np.array(images).reshape((num_items, col * row)).astype(np.float32)
     return np.array(labels).astype(np.float32), np.array(images).astype(np.float32)
@@ -225,11 +225,12 @@ def run():
         print("optimization completed")
 
         '''
-        training이 완료된 모델로 test 데이터의 성능을 측정한다.        
+        training이 완료된 모델로 test 데이터의 성능을 측정한다.
         '''
         isCorrect = tf.equal(tf.argmax(model, 1), tf.argmax(Y, 1)) #각각이 정답 레이블과 일치하는지 확인.
         accuracy = tf.reduce_mean(tf.cast(isCorrect, tf.float32)) #전체 결과를 평균(true/false를 float32로 변환).
         # validation단계이므로 dropout은 하지 않음.
         print("accuracy : ", session.run([accuracy], feed_dict={X:testX.reshape(-1, 28, 28, 1), Y:testY, keep_prob:1.0}))
 
-run()
+if __name__ == '__main__':
+    run()
