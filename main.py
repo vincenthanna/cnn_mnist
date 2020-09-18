@@ -5,11 +5,19 @@ http://yann.lecun.com/exdb/mnist/ 에서 직접 파일을 다운로드받아서 
 모델에 가공되지 않은 데이터를 넣어야 하는 경우 예제 코드.
 """
 
+import os
 import tensorflow as tf
 import struct
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+
+MODEL_SAVE_DIR_PATH = './trained/'
+MODEL_NAME = 'model'
+
+MODEL_SAVE_PATH = os.path.join(MODEL_SAVE_DIR_PATH, MODEL_NAME)
+
+
 
 #models :
 from models.model_simple import build_model_simple
@@ -202,27 +210,36 @@ def run():
     batch_size = 100
     total_batch = int(num_train / batch_size)
 
-    num_epochs = 10
+    num_epochs = 1
     with tf.Session() as session:
 
         initializer = tf.global_variables_initializer()
         session.run(initializer)
 
-        for epoch in range(num_epochs):
-            total_cost = 0
+        saver = tf.compat.v1.train.Saver()
 
-            for i in range(total_batch):
-                batch_xs = get_batch(trainX, batch_size, i)
-                batch_ys = get_batch(trainY, batch_size, i)
-                batch_xs = batch_xs.reshape(-1, 28, 28, 1)
-                #print("batch ", str(i), " : ", batch_xs.shape, batch_ys.shape, batch_xs.dtype, batch_ys.dtype)
+        if os.path.isdir(MODEL_SAVE_DIR_PATH):
+            print(">>>>>>>>>>>>>>>>>>> restore previous model")
+            saver.restore(session, tf.train.latest_checkpoint(MODEL_SAVE_DIR_PATH))
+        else:
+            for epoch in range(num_epochs):
+                total_cost = 0
 
-                _, cost_val = session.run([optimizer, cost], feed_dict={X: batch_xs, Y: batch_ys, keep_prob:0.7})
-                total_cost += cost_val
+                for i in range(total_batch):
+                    batch_xs = get_batch(trainX, batch_size, i)
+                    batch_ys = get_batch(trainY, batch_size, i)
+                    batch_xs = batch_xs.reshape(-1, 28, 28, 1)
+                    #print("batch ", str(i), " : ", batch_xs.shape, batch_ys.shape, batch_xs.dtype, batch_ys.dtype)
 
-            print("epoch ", epoch, " average cost:", "{:.3f}".format(total_cost / total_batch))
+                    _, cost_val = session.run([optimizer, cost], feed_dict={X: batch_xs, Y: batch_ys, keep_prob:0.7})
+                    total_cost += cost_val
 
-        print("optimization completed")
+                print("epoch ", epoch, " average cost:", "{:.3f}".format(total_cost / total_batch))
+
+            print("optimization completed")
+
+            saver.save(session, MODEL_SAVE_PATH, global_step=0)
+
 
         '''
         training이 완료된 모델로 test 데이터의 성능을 측정한다.
