@@ -29,10 +29,28 @@ def load_mnists():
     http://yann.lecun.com/exdb/mnist/ 에서 파일을 다운로드받고 압축을 푼 파일을 사용한다.
     아래 파일명과 비교해서 이름이 다르면 수정해 줄 것.
     '''
-    trainSet_label_filename = "train-labels.idx1-ubyte"
-    trainSet_image_filename = "train-images.idx3-ubyte"
-    testSet_label_filename = "t10k-labels.idx1-ubyte"
-    testSet_image_filename = "t10k-images.idx3-ubyte"
+    trainSet_label_filename = "train-labels-idx1-ubyte"
+    trainSet_image_filename = "train-images-idx3-ubyte"
+    testSet_label_filename = "t10k-labels-idx1-ubyte"
+    testSet_image_filename = "t10k-images-idx3-ubyte"
+
+    urls = ["http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz",
+        "http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz",
+        "http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz",
+        "http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz"]
+
+    # download files & unzip
+    for url in urls:
+        fname = url[url.rfind("/") + 1:]
+        targetfname = fname[:len(fname)-3]
+        if os.path.isfile(targetfname) == False:
+            if os.path.isfile(fname) == False:
+                print("downloading ", fname)
+                with urllib.request.urlopen(url) as response, open(fname, 'wb') as out_file:
+                    data = response.read() # a `bytes` object
+                    out_file.write(data)
+            print("unzipping ", fname)
+            gunzip(fname)
 
     trainSet_labels, trainSet_images = load_mnist_set(trainSet_label_filename, trainSet_image_filename)
     testSet_labels, testSet_images = load_mnist_set(testSet_label_filename, testSet_image_filename)
@@ -191,6 +209,9 @@ def run():
 
     # select model : FIXME:
     model = build_model_simple(X, keep_prob=keep_prob, labelCnt=classCnt)
+
+    # inference
+    inference = tf.argmax(model, 1)
 
     # cost function
     '''
