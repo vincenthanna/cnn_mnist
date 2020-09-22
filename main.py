@@ -11,6 +11,9 @@ import struct
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import urllib
+import gzip
+
 
 MODEL_SAVE_DIR_PATH = './trained/'
 MODEL_NAME = 'model'
@@ -21,6 +24,17 @@ MODEL_SAVE_PATH = os.path.join(MODEL_SAVE_DIR_PATH, MODEL_NAME)
 
 #models :
 from models.model_simple import build_model_simple
+
+def decompress_gz(gzipname, targetname):
+    input = gzip.GzipFile(gzipname, 'rb')
+    s = input.read()
+    input.close()
+
+    output = open(targetname, 'wb')
+    output.write(s)
+    output.close()
+
+
 
 def load_mnists():
 
@@ -50,7 +64,8 @@ def load_mnists():
                     data = response.read() # a `bytes` object
                     out_file.write(data)
             print("unzipping ", fname)
-            gunzip(fname)
+            decompress_gz(fname, targetfname)
+            
 
     trainSet_labels, trainSet_images = load_mnist_set(trainSet_label_filename, trainSet_image_filename)
     testSet_labels, testSet_images = load_mnist_set(testSet_label_filename, testSet_image_filename)
@@ -231,7 +246,7 @@ def run():
     batch_size = 100
     total_batch = int(num_train / batch_size)
 
-    num_epochs = 1
+    num_epochs = 16
     with tf.Session() as session:
 
         initializer = tf.global_variables_initializer()
